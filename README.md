@@ -143,7 +143,7 @@ The platform is an online study tool that enables users to securely create, edit
   }
   ```
 
-- `POST /api/auth/login` - log in a user.
+`POST /api/auth/login` - log in a user.
 
 **Request:**
 
@@ -181,7 +181,7 @@ The platform is an online study tool that enables users to securely create, edit
   }
   ```
 
-- `PUT /api/auth/{user_id}` - edit a user.
+`PUT /api/auth/{user_id}` - edit a user.
 
 **Header**
 
@@ -228,7 +228,7 @@ The platform is an online study tool that enables users to securely create, edit
 
 ## Flashcards Service Endpoints:
 
-- `GET /api/flashcards` - get a list of sets of flashcards.
+`GET /api/flashcards` - get a list of sets of flashcards.
 
 **Response:**
 
@@ -254,7 +254,7 @@ The platform is an online study tool that enables users to securely create, edit
   }
   ```
 
-- `GET /api/flashcards/{setId}` - get a set of flashcards
+`GET /api/flashcards/{setId}` - get a set of flashcards
 
 **Response:**
 
@@ -284,7 +284,7 @@ The platform is an online study tool that enables users to securely create, edit
   }
   ```
 
-- `POST /api/flashcards` - post a flashcard.
+`POST /api/flashcards` - post a flashcard.
 
 **Request:**
 
@@ -321,7 +321,7 @@ The platform is an online study tool that enables users to securely create, edit
   }
   ```
 
-- `PUT /api/flashcards/{setId}` - update a flashcard.
+`PUT /api/flashcards/{setId}` - update a flashcard.
 
 **Request:**
 
@@ -356,7 +356,7 @@ The platform is an online study tool that enables users to securely create, edit
   }
   ```
 
-- `DELETE /api/flashcards/{setId}` - delete a flashcard.
+`DELETE /api/flashcards/{setId}` - delete a flashcard.
 
 **Response:**
 
