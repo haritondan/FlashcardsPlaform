@@ -8,50 +8,80 @@ The platform is an online study tool that enables users to securely create, edit
 
 ### Why Microservices are Relevant for the Study Platform:
 
-**Complexity and Independent Components**: Managing flashcards as a separate microservice simplifies scaling, maintenance, and upgrades, ensuring better performance and flexibility.
+- **Complexity and Independent Components**: Managing flashcards as a separate microservice simplifies scaling, maintenance, and upgrades, ensuring better performance and flexibility.
 
-**Scalability**: The Flashcards Microservice scales independently to handle high usage during peak times like exams.
+- **Scalability**: The Flashcards Microservice scales independently to handle high usage during peak times like exams.
 
-**Real-time Updates**: WebSockets enable real-time notifications for flashcard updates and changes.
+- **Real-time Updates**: WebSockets enable real-time notifications for flashcard updates and changes.
 
-**Faster Iteration**: Decoupling flashcards allows faster development of new features without impacting the rest of the platform.
+- **Faster Iteration**: Decoupling flashcards allows faster development of new features without impacting the rest of the platform.
 
 ### Real-world Examples:
 
-**Quizlet**: A popular learning platform that provides flashcards as one of its core services, scaling it independently for millions of students worldwide.
+- **Quizlet**: A popular learning platform that provides flashcards as one of its core services, scaling it independently for millions of students worldwide.
 
 ## Service Boundaries
 
-![Architecture](./architecture.png)
+![Architecture](./pad-arch.png)
 
 ### Define Service Boundaries
 
-**Authentication Microservice:** Authenticate users and provide access control for different features, including flashcards.
-
-**Flashcards Microservice:** Allows users to create, edit and delete flashcards.
-Provides subscripton for flashcards updates.
+- **Authentication Microservice:** Authenticate users and provide access control for different features, including flashcards.
+- **Flashcards Microservice:** Allows users to create, edit and delete flashcards.
+  Provides subscripton for flashcards updates.
 
 ## Technology Stack and Communication Patterns
 
-**Gateway, Service Discovery, and Load Balancer** in Node.js – Node.js is an event-driven framework well-suited for handling multiple simultaneous requests, making it ideal for the API gateway and load balancing.
+- **Gateway, Service Discovery, and Load Balancer in Node.js** – Node.js is an event-driven framework well-suited for handling multiple simultaneous requests, making it ideal for the API gateway and load balancing.
 
-**Authentication and Flashcards Services** in Flask – Flask is a lightweight and flexible framework that works well for building RESTful APIs, making it a good fit for the Authentication and Flashcards Microservices.
+- **Authentication and Flashcards Services in Flask** – Flask is a lightweight and flexible framework that works well for building RESTful APIs, making it a good fit for the Authentication and Flashcards Microservices.
 
-**Authentication Service Database** in PostgreSQL – The Authentication Service requires strong data integrity, making PostgreSQL an excellent choice for handling structured user data.
+- **Authentication and Flashcards Service Databases in PostgreSQL** – Both the Authentication and Flashcards Services require strong data integrity and benefit from a relational structure. PostgreSQL is an excellent choice for handling structured user data, storing flashcards, their relationships, and related metadata, ensuring consistency across both services.
 
-**Flashcards Service Database** in MongoDB – Flashcards data can involve high throughput and flexibility, which is efficiently handled by a non-relational database like MongoDB.
+- **Cache in Redis** – Redis is used for caching frequently accessed flashcard sets, providing quick retrieval and reducing the load on the database.
 
-**Cache** in Redis – Redis is used for caching frequently accessed flashcard sets, providing quick retrieval and reducing the load on the database.
+- **Inter-Service Communication in gRPC** – gRPC offers efficient communication with bi-directional streaming, ensuring fast and reliable interactions between the microservices.
 
-**Inter-Service Communication** in gRPC – gRPC offers efficient communication with bi-directional streaming, ensuring fast and reliable interactions between the microservices.
+- **WebSocket for Asynchronous Communication** – WebSockets enable asynchronous real-time communication, allowing the Flashcards Microservice to send live notifications about updates.
 
-**WebSocket for Asynchronous Communication** – WebSockets enable asynchronous real-time communication, allowing the Flashcards Microservice to send live notifications and updates, such as when new flashcards are shared or modified.
-
-**User-Service Communication** as RESTful APIs – REST architecture is simple and efficient, allowing users to easily interact with the platform's microservices.
+- **User-Service Communication as RESTful APIs** – REST architecture is simple and efficient, allowing users to easily interact with the platform's microservices.
 
 ## Data Management Design
 
-### Models
+### Tables
+
+- **User Model**
+
+  ```json
+  {
+    "userId": "int",
+    "username": "string",
+    "email": "string",
+    "password": "string"
+  }
+  ```
+
+- **FlashcardSet Model**
+
+  ```json
+  {
+    "setId": "int",
+    "title": "string",
+    "subject": "string",
+    "creatorId": "int"
+  }
+  ```
+
+- **Flashcard Model**
+
+  ```json
+  {
+    "cardId": "int",
+    "setId": "int",
+    "question": "string",
+    "answer": "string"
+  }
+  ```
 
 ## Status Endpoints:
 
