@@ -22,7 +22,7 @@ The platform is an online study tool that enables users to securely create, edit
 
 ## Service Boundaries
 
-![Architecture](img/pad-arch.png)
+![Architecture](img/pad-arch.drawio.png)
 
 ### Define Service Boundaries
 
@@ -68,7 +68,9 @@ The platform is an online study tool that enables users to securely create, edit
     "setId": "int",
     "title": "string",
     "subject": "string",
-    "creatorId": "int"
+    "creatorId": "int",
+    "createdAt": "timestamp",
+    "updatedAt": "timestamp"
   }
   ```
 
@@ -79,7 +81,9 @@ The platform is an online study tool that enables users to securely create, edit
     "cardId": "int",
     "setId": "int",
     "question": "string",
-    "answer": "string"
+    "answer": "string",
+    "createdAt": "timestamp",
+    "updatedAt": "timestamp"
   }
   ```
 
@@ -445,7 +449,7 @@ The platform is an online study tool that enables users to securely create, edit
     "flashcard_set_id": 1234
   }
   ```
-- 404 Not Found
+- 400 Bad Request
 
   ```json
   {
