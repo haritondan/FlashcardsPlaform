@@ -2,7 +2,7 @@
 FROM python:3.9-slim
 
 # Set working directory
-WORKDIR /app
+WORKDIR /flashcards-service
 
 # Copy requirements and install
 COPY requirements.txt requirements.txt
@@ -12,7 +12,7 @@ RUN pip install -r requirements.txt
 COPY . .
 
 # Expose the port the service runs on
-EXPOSE 5000
+EXPOSE 5001
 
 # Command to run the service
-CMD ["python", "./src/app.py"]
+CMD ["python", "/src/app.py"]
