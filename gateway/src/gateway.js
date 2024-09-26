@@ -1,10 +1,11 @@
-import express from "express";
-const app = express();
+const { createServer } = require("http");
 
-app.get("/status", (req, res) => {
-  res.status(200).json({ service: "gateway", status: "running" });
+const server = createServer((req, res) => {
+  res.statusCode = 200;
+  res.setHeader("Content-Type", "text/plain");
+  res.end("Gateway is working");
 });
 
-app.listen(8080, () => {
-  console.log("Gateway is running on port 8080");
+server.listen(8080, () => {
+  console.log("Gateway running on port 8080");
 });

@@ -2,7 +2,7 @@
 FROM node:14
 
 # Set working directory
-WORKDIR /gateway
+WORKDIR /usr/src/app
 
 # Copy package.json and install dependencies
 COPY package.json ./
@@ -15,4 +15,4 @@ COPY . .
 EXPOSE 8080
 
 # Command to run the gateway
-CMD ["node", "/src/gateway.js"]
+CMD ["node", "src/gateway.js"]

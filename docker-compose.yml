@@ -1,0 +1,36 @@
+version: "3.8"
+
+services:
+  auth-service:
+    build:
+      context: ./auth-service
+    container_name: auth-service
+    ports:
+      - "5000:5000"
+    networks:
+      - study-network
+
+  flashcards-service:
+    build:
+      context: ./flashcards-service
+    container_name: flashcards-service
+    ports:
+      - "5001:5001"
+    networks:
+      - study-network
+
+  api-gateway:
+    build:
+      context: ./gateway
+    container_name: gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - auth-service
+      - flashcards-service
+    networks:
+      - study-network
+
+networks:
+  study-network:
+    driver: bridge

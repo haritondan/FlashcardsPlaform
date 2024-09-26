@@ -15,4 +15,4 @@ COPY . .
 EXPOSE 5000
 
 # Command to run the service
-CMD ["python", "./src/app.py"]
+CMD ["python", "app.py"]
