@@ -19,6 +19,20 @@ services:
     networks:
       - study-network
 
+  auth-db:
+    image: postgres:13
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=authdb
+    volumes:
+      - ./auth-db/init-auth.sql:/docker-entrypoint-init-auth.d/init-auth.sql
+      - auth-db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - study-network
+
   api-gateway:
     build:
       context: ./gateway
@@ -34,3 +48,6 @@ services:
 networks:
   study-network:
     driver: bridge
+
+volumes:
+  auth-db-data:
