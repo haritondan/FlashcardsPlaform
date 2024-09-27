@@ -1,7 +1,8 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from models.user import User
-from db import db  # Import db from db.py
+from sqlalchemy import text
+from db import db 
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -11,7 +12,7 @@ def register():
     data = request.get_json()
     username = data.get('username')
     email = data.get('email')
-    password = data.get('password')  # No password hashing
+    password = data.get('password') 
 
     # Check if username or email already exists
     if User.query.filter_by(username=username).first():
@@ -35,7 +36,6 @@ def login():
 
     user = User.query.filter_by(email=email).first()
 
-    # Verify user credentials (no password hashing)
     if user and user.password == password:
         # Create JWT token
         access_token = create_access_token(identity=user.username)
@@ -53,17 +53,17 @@ def logout():
 @auth_bp.route('/api/auth/status', methods=['GET'])
 def status():
     try:
-        db.session.execute('SELECT 1')  # Check DB connection
+        db.session.execute(text('SELECT 1'))  # Check DB connection
         return jsonify({'status': 'OK', 'database': 'Connected'}), 200
     except Exception as e:
         return jsonify({'status': 'ERROR', 'database': 'Not connected', 'error': str(e)}), 500
 
-# # Get all users
-# @auth_bp.route('/api/users', methods=['GET'])
-# def get_all_users():
-#     users = User.query.all()
-#     user_list = [{'id': user.id, 'username': user.username, 'email': user.email} for user in users]
-#     return jsonify(user_list), 200
+# Get all users
+@auth_bp.route('/api/users', methods=['GET'])
+def get_all_users():
+    users = User.query.all()
+    user_list = [{'id': user.id, 'username': user.username, 'email': user.email} for user in users]
+    return jsonify(user_list), 200
 
 # Update a user
 @auth_bp.route('/api/users/<int:id>', methods=['PUT'])
@@ -74,13 +74,12 @@ def update_user(id):
     if not user:
         return jsonify({'message': 'User not found'}), 404
 
-    # Update user info (no password hashing)
     if 'username' in data:
         user.username = data['username']
     if 'email' in data:
         user.email = data['email']
     if 'password' in data:
-        user.password = data['password']  # No hashing
+        user.password = data['password']  
 
     db.session.commit()
     return jsonify({'message': 'User updated successfully'}), 200

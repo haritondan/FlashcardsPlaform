@@ -5,6 +5,8 @@ services:
     build:
       context: ./auth-service
     container_name: auth-service
+    depends_on:
+      - auth-db
     ports:
       - "5000:5000"
     networks:
@@ -20,14 +22,13 @@ services:
       - study-network
 
   auth-db:
-    image: postgres:13
+    image: postgres:16
     environment:
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=authdb
     volumes:
-      - ./auth-db/init-auth.sql:/docker-entrypoint-init-auth.d/init-auth.sql
-      - auth-db-data:/var/lib/postgresql/data
+      - ./auth-db/init-auth.sql:/docker-entrypoint-initdb.d/init-auth.sql
     ports:
       - "5432:5432"
     networks:
@@ -48,6 +49,3 @@ services:
 networks:
   study-network:
     driver: bridge
-
-volumes:
-  auth-db-data:
