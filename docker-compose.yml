@@ -12,15 +12,6 @@ services:
     networks:
       - study-network
 
-  flashcards-service:
-    build:
-      context: ./flashcards-service
-    container_name: flashcards-service
-    ports:
-      - "5001:5001"
-    networks:
-      - study-network
-
   auth-db:
     image: postgres:16
     environment:
@@ -33,6 +24,30 @@ services:
       - "5432:5432"
     networks:
       - study-network
+
+  flashcards-service:
+    build:
+      context: ./flashcards-service
+    container_name: flashcards-service
+    depends_on:
+      - flashcards-db
+    ports:
+      - "5001:5001"
+    networks:
+      - study-network
+
+  flashcards-db:
+  image: postgres:13
+  environment:
+    - POSTGRES_USER=admin
+    - POSTGRES_PASSWORD=password
+    - POSTGRES_DB=flashcardsdb
+  ports:
+    - "5433:5432"
+  volumes:
+    - ./auth-db/init-flash.sql:/docker-entrypoint-initdb.d/init-flash.sql
+  networks:
+    - study-network
 
   api-gateway:
     build:
