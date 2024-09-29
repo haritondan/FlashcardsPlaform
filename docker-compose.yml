@@ -49,7 +49,7 @@ services:
     networks:
       - study-network
 
-  api-gateway:
+  gateway:
     build:
       context: ./gateway
     container_name: gateway

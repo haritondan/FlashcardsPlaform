@@ -1,11 +1,14 @@
-const { createServer } = require("http");
+import express from "express";
+import authRoutes from "./routes/authRoutes.js";
+import flashcardRoutes from "./routes/flashcardRoutes.js";
 
-const server = createServer((req, res) => {
-  res.statusCode = 200;
-  res.setHeader("Content-Type", "text/plain");
-  res.end("Gateway is working");
-});
+const app = express();
 
-server.listen(8080, () => {
+app.use(express.json());
+
+app.use("/api/auth", authRoutes);
+app.use("/api/flashcards", flashcardRoutes);
+
+app.listen(8080, () => {
   console.log("Gateway running on port 8080");
 });
