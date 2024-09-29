@@ -37,17 +37,17 @@ services:
       - study-network
 
   flashcards-db:
-  image: postgres:13
-  environment:
-    - POSTGRES_USER=admin
-    - POSTGRES_PASSWORD=password
-    - POSTGRES_DB=flashcardsdb
-  ports:
-    - "5433:5432"
-  volumes:
-    - ./auth-db/init-flash.sql:/docker-entrypoint-initdb.d/init-flash.sql
-  networks:
-    - study-network
+    image: postgres:13
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=flashcardsdb
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./flashcards-db/init-flash.sql:/docker-entrypoint-initdb.d/init-flash.sql
+    networks:
+      - study-network
 
   api-gateway:
     build:

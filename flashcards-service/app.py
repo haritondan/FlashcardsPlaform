@@ -1,16 +1,13 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from db import db
+from routes import flashcards_bp
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://admin:password@flashcardsdb:5432/flashcardsdb'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://admin:password@flashcards-db:5432/flashcardsdb'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
-
-
 db.init_app(app)
 
-from routes import flashcards_bp
 app.register_blueprint(flashcards_bp)
 
 if __name__ == '__main__':

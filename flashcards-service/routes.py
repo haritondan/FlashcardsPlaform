@@ -1,7 +1,8 @@
 from flask import Blueprint, request, jsonify
-from app import db
+from db import db
 from models.flashcard_set import FlashcardSet
 from models.flashcard import Flashcard
+from sqlalchemy import text
 
 flashcards_bp = Blueprint('flashcards_bp', __name__)
 
@@ -86,3 +87,33 @@ def delete_flashcard_set(set_id):
     db.session.delete(flashcard_set)
     db.session.commit()
     return jsonify({"message": "Flashcard set deleted successfully"}), 200
+
+
+
+@flashcards_bp.route('/api/flashcards/status', methods=['GET'])
+def status():
+    try:
+        # Execute a simple query using the db engine to check the connection
+        with db.engine.connect() as connection:
+            result = connection.execute(text('SELECT 1')).fetchone()
+        
+        if result and result[0] == 1:
+            return jsonify({
+                "service": "flashcards",
+                "status": "OK",
+                "database": "Connected"
+            }), 200
+        else:
+            return jsonify({
+                "service": "flashcards",
+                "status": "ERROR",
+                "database": "Connected but query returned unexpected result"
+            }), 500
+    except Exception as e:
+        return jsonify({
+            "service": "flashcards",
+            "status": "ERROR",
+            "database": "Not connected",
+            "error": str(e)
+        }), 500
+
