@@ -16,6 +16,52 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.post("/", async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ message: "Authorization token is required" });
+  }
+  try {
+    const response = await axios.post(
+      "http://flashcards-service:5001/api/flashcards",
+      req.body,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    res.json(response.data);
+  } catch (error) {
+    res
+      .status(error.response?.status || 500)
+      .json(error.response?.data || { message: "Server error" });
+  }
+});
+
+router.put("/:setId", async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ message: "Authorization token is required" });
+  }
+  try {
+    const response = await axios.put(
+      `http://flashcards-service:5001/api/flashcards/${req.params.setId}`,
+      req.body,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    res.json(response.data);
+  } catch (error) {
+    res
+      .status(error.response?.status || 500)
+      .json(error.response?.data || { message: "Server error" });
+  }
+});
+
 router.get("/:setId", async (req, res) => {
   try {
     const response = await axios.get(
@@ -29,38 +75,19 @@ router.get("/:setId", async (req, res) => {
   }
 });
 
-router.post("/", async (req, res) => {
-  try {
-    const response = await axios.post(
-      "http://flashcards-service:5001/api/flashcards",
-      req.body
-    );
-    res.json(response.data);
-  } catch (error) {
-    res
-      .status(error.response?.status || 500)
-      .json(error.response?.data || { message: "Server error" });
-  }
-});
-
-router.put("/:setId", async (req, res) => {
-  try {
-    const response = await axios.put(
-      `http://flashcards-service:5001/api/flashcards/${req.params.setId}`,
-      req.body
-    );
-    res.json(response.data);
-  } catch (error) {
-    res
-      .status(error.response?.status || 500)
-      .json(error.response?.data || { message: "Server error" });
-  }
-});
-
 router.delete("/:setId", async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ message: "Authorization token is required" });
+  }
   try {
     const response = await axios.delete(
-      `http://flashcards-service:5001/api/flashcards/${req.params.setId}`
+      `http://flashcards-service:5001/api/flashcards/${req.params.setId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
     );
     res.json(response.data);
   } catch (error) {
