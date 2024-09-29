@@ -38,7 +38,7 @@ def login():
 
     if user and user.password == password:
         # Create JWT token
-        access_token = create_access_token(identity=user.username)
+        access_token = create_access_token(identity=user.id)
         return jsonify({'message': 'Login successful', 'access_token': access_token, 'user': user.username}), 200
     else:
         return jsonify({'message': 'Invalid email or password'}), 401
@@ -59,14 +59,15 @@ def status():
         return jsonify({'status': 'ERROR', 'database': 'Not connected', 'error': str(e)}), 500
 
 # Get all users
-@auth_bp.route('/api/users', methods=['GET'])
+@auth_bp.route('/api/auth/users', methods=['GET'])
 def get_all_users():
     users = User.query.all()
     user_list = [{'id': user.id, 'username': user.username, 'email': user.email} for user in users]
     return jsonify(user_list), 200
 
 # Update a user
-@auth_bp.route('/api/users/<int:id>', methods=['PUT'])
+@auth_bp.route('/api/auth/users/<int:id>', methods=['PUT'])
+@jwt_required()
 def update_user(id):
     data = request.get_json()
     user = User.query.get(id)
@@ -79,7 +80,17 @@ def update_user(id):
     if 'email' in data:
         user.email = data['email']
     if 'password' in data:
-        user.password = data['password']  
+        user.password = data['password']  # In a real-world app, hash this
 
     db.session.commit()
     return jsonify({'message': 'User updated successfully'}), 200
+
+
+
+@auth_bp.route('/api/auth/users/<int:user_id>', methods=['DELETE'])
+@jwt_required()
+def delete_user(user_id):
+    user = User.query.get_or_404(user_id)
+    db.session.delete(user)
+    db.session.commit()
+    return jsonify({'message': 'User deleted successfully'}), 200

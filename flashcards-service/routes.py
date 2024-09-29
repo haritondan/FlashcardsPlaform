@@ -3,6 +3,7 @@ from db import db
 from models.flashcard_set import FlashcardSet
 from models.flashcard import Flashcard
 from sqlalchemy import text
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 flashcards_bp = Blueprint('flashcards_bp', __name__)
 
@@ -37,12 +38,14 @@ def get_flashcard_set(set_id):
 
 # Create a new flashcard set
 @flashcards_bp.route('/api/flashcards', methods=['POST'])
+@jwt_required()
 def create_flashcard_set():
     data = request.get_json()
     title = data.get('title')
     subject = data.get('subject')
-    creator_id = data.get('creatorId')
     cards_data = data.get('cards', [])
+
+    creator_id = get_jwt_identity()
 
     new_flashcard_set = FlashcardSet(title=title, subject=subject, creator_id=creator_id)
     db.session.add(new_flashcard_set)
