@@ -53,8 +53,8 @@ def logout():
 @auth_bp.route('/api/auth/status', methods=['GET'])
 def status():
     try:
-        db.session.execute(text('SELECT 1'))  # Check DB connection
-        return jsonify({'status': 'OK', 'database': 'Connected'}), 200
+        db.session.execute(text('SELECT 1'))  
+        return jsonify({'servise': 'auth','status': 'running'}), 200
     except Exception as e:
         return jsonify({'status': 'ERROR', 'database': 'Not connected', 'error': str(e)}), 500
 
@@ -87,10 +87,10 @@ def update_user(id):
 
 
 
-@auth_bp.route('/api/auth/users/<int:user_id>', methods=['DELETE'])
-@jwt_required()
-def delete_user(user_id):
-    user = User.query.get_or_404(user_id)
-    db.session.delete(user)
-    db.session.commit()
-    return jsonify({'message': 'User deleted successfully'}), 200
+# @auth_bp.route('/api/auth/users/<int:user_id>', methods=['DELETE'])
+# @jwt_required()
+# def delete_user(user_id):
+#     user = User.query.get_or_404(user_id)
+#     db.session.delete(user)
+#     db.session.commit()
+#     return jsonify({'message': 'User deleted successfully'}), 200

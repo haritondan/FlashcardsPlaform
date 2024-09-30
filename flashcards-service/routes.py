@@ -1,3 +1,4 @@
+import time
 from flask import Blueprint, request, jsonify
 from db import db
 from models.flashcard_set import FlashcardSet
@@ -11,6 +12,7 @@ flashcards_bp = Blueprint('flashcards_bp', __name__)
 @flashcards_bp.route('/api/flashcards', methods=['GET'])
 def get_flashcard_sets():
     flashcard_sets = FlashcardSet.query.all()
+    # time.sleep(6)  # Simulate a slow request
     results = [
         {
             "setId": fs.id,
@@ -99,12 +101,10 @@ def status():
         # Execute a simple query using the db engine to check the connection
         with db.engine.connect() as connection:
             result = connection.execute(text('SELECT 1')).fetchone()
-        
         if result and result[0] == 1:
             return jsonify({
                 "service": "flashcards",
-                "status": "OK",
-                "database": "Connected"
+                "status": "running"
             }), 200
         else:
             return jsonify({
