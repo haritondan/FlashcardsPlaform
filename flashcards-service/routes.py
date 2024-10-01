@@ -1,4 +1,5 @@
-import time
+import json
+import redis, time
 from flask import Blueprint, request, jsonify
 from db import db
 from models.flashcard_set import FlashcardSet
@@ -16,6 +17,10 @@ semaphore = threading.BoundedSemaphore(value=max_concurrent_tasks)
 flashcards_bp = Blueprint('flashcards_bp', __name__)
 
 limiter = Limiter(get_remote_address)
+
+cache = redis.Redis(host='redis', port=6379, decode_responses=True)
+CACHE_KEY_PREFIX = 'flashcard_set_'
+
 
 # Get all flashcard sets
 @flashcards_bp.route('/api/flashcards', methods=['GET'])
@@ -45,6 +50,15 @@ def get_flashcard_sets():
 def get_flashcard_set(set_id):
     try:
         semaphore.acquire()
+        cache_key = f"{CACHE_KEY_PREFIX}{set_id}"
+
+        # Check if flashcard set exists in cache
+        cached_flashcard_set = cache.get(cache_key)
+        
+        if cached_flashcard_set:
+            flashcard_set_data = json.loads(cached_flashcard_set)
+            return jsonify({"data": flashcard_set_data, "source": "redis"}), 200
+        
         flashcard_set = FlashcardSet.query.get_or_404(set_id)
         result = {
             "setId": flashcard_set.id,
@@ -53,6 +67,8 @@ def get_flashcard_set(set_id):
             "creatorId": flashcard_set.creator_id,
             "cards": [{"cardId": card.id, "question": card.question, "answer": card.answer} for card in flashcard_set.flashcards]
         }
+
+        cache.setex(cache_key, 300, json.dumps(result))
         return jsonify(result), 200
     finally:
         semaphore.release()
@@ -109,7 +125,7 @@ def update_flashcard_set(set_id):
                 db.session.add(new_card)
 
         db.session.commit()
-
+        cache.delete(f"{CACHE_KEY_PREFIX}{set_id}")
         return jsonify({"message": "Flashcard set updated successfully"}), 200
     finally:
         semaphore.release()
