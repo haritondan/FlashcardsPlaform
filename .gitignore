@@ -1,2 +1,7 @@
 .venv/
 node_modules/
+auth-service/_pycache__/
+auth-service/_pycache__/
+# ignore the cahce files in the auth service
+auth-service/__pycache__/
+auth-service/models/__pycache__/
