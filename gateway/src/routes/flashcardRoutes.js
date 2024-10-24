@@ -1,16 +1,18 @@
 import express from "express";
 import axios from "axios";
 import Consul from "consul";
-
+import CircuitBreaker from "../circuitBreaker.js"; // Import Circuit Breaker
 const router = express.Router();
 const consul = new Consul({ host: "consul", port: 8500 });
 const consul_url = "http://consul:8500";
 const axiosInstance = axios.create({
-  timeout: 15000,
+  timeout: 5000,
 });
 
 let authServiceIndex = 0;
 let flashcardsServiceIndex = 0;
+
+const flashcardsServiceBreaker = new CircuitBreaker(5000); // 5 seconds timeout
 
 // Round Robin Service Discovery
 const getServiceAddress = async (serviceName) => {
@@ -49,6 +51,12 @@ const getServiceAddress = async (serviceName) => {
 
 router.get("/", async (req, res) => {
   try {
+    if (flashcardsServiceBreaker.isCircuitOpen()) {
+      return res
+        .status(503)
+        .json({ message: "Service unavailable due to repeated failures." });
+    }
+
     const flashcardsServiceAddress = await getServiceAddress(
       "flashcards-service"
     );
@@ -57,6 +65,8 @@ router.get("/", async (req, res) => {
     );
     res.json(response.data);
   } catch (error) {
+    flashcardsServiceBreaker.recordFailure();
+    flashcardsServiceBreaker.recordFailure();
     if (error.code === "ECONNABORTED") {
       res.status(408).json({ message: "Request Timeout" });
     } else {
@@ -73,6 +83,12 @@ router.post("/", async (req, res) => {
     return res.status(401).json({ message: "Authorization token is required" });
   }
   try {
+    if (flashcardsServiceBreaker.isCircuitOpen()) {
+      return res
+        .status(503)
+        .json({ message: "Service unavailable due to repeated failures." });
+    }
+
     const flashcardsServiceAddress = await getServiceAddress(
       "flashcards-service"
     );
@@ -87,6 +103,7 @@ router.post("/", async (req, res) => {
     );
     res.json(response.data);
   } catch (error) {
+    flashcardsServiceBreaker.recordFailure();
     if (error.code === "ECONNABORTED") {
       res.status(408).json({ message: "Request Timeout" });
     } else {
@@ -103,6 +120,12 @@ router.put("/:setId", async (req, res) => {
     return res.status(401).json({ message: "Authorization token is required" });
   }
   try {
+    if (flashcardsServiceBreaker.isCircuitOpen()) {
+      return res
+        .status(503)
+        .json({ message: "Service unavailable due to repeated failures." });
+    }
+
     const flashcardsServiceAddress = await getServiceAddress(
       "flashcards-service"
     );
@@ -117,6 +140,7 @@ router.put("/:setId", async (req, res) => {
     );
     res.json(response.data);
   } catch (error) {
+    flashcardsServiceBreaker.recordFailure();
     if (error.code === "ECONNABORTED") {
       res.status(408).json({ message: "Request Timeout" });
     } else {
@@ -129,6 +153,12 @@ router.put("/:setId", async (req, res) => {
 
 router.get("/:setId", async (req, res) => {
   try {
+    if (flashcardsServiceBreaker.isCircuitOpen()) {
+      return res
+        .status(503)
+        .json({ message: "Service unavailable due to repeated failures." });
+    }
+
     const flashcardsServiceAddress = await getServiceAddress(
       "flashcards-service"
     );
@@ -137,6 +167,7 @@ router.get("/:setId", async (req, res) => {
     );
     res.json(response.data);
   } catch (error) {
+    flashcardsServiceBreaker.recordFailure();
     if (error.code === "ECONNABORTED") {
       res.status(408).json({ message: "Request Timeout" });
     } else {
@@ -153,6 +184,12 @@ router.delete("/:setId", async (req, res) => {
     return res.status(401).json({ message: "Authorization token is required" });
   }
   try {
+    if (flashcardsServiceBreaker.isCircuitOpen()) {
+      return res
+        .status(503)
+        .json({ message: "Service unavailable due to repeated failures." });
+    }
+
     const flashcardsServiceAddress = await getServiceAddress(
       "flashcards-service"
     );
@@ -166,6 +203,7 @@ router.delete("/:setId", async (req, res) => {
     );
     res.json(response.data);
   } catch (error) {
+    flashcardsServiceBreaker.recordFailure();
     if (error.code === "ECONNABORTED") {
       res.status(408).json({ message: "Request Timeout" });
     } else {
@@ -178,6 +216,12 @@ router.delete("/:setId", async (req, res) => {
 
 router.get("/status", async (req, res) => {
   try {
+    if (flashcardsServiceBreaker.isCircuitOpen()) {
+      return res
+        .status(503)
+        .json({ message: "Service unavailable due to repeated failures." });
+    }
+
     const flashcardsServiceAddress = await getServiceAddress(
       "flashcards-service"
     );
@@ -186,6 +230,7 @@ router.get("/status", async (req, res) => {
     );
     res.json(response.data);
   } catch (error) {
+    flashcardsServiceBreaker.recordFailure();
     if (error.code === "ECONNABORTED") {
       res.status(408).json({ message: "Request Timeout" });
     } else {

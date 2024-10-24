@@ -1,16 +1,18 @@
 import express from "express";
 import axios from "axios";
 import Consul from "consul";
-
+import CircuitBreaker from "../circuitBreaker.js"; // Import Circuit Breaker
 const router = express.Router();
 const consul = new Consul({ host: "consul", port: 8500 }); // Connect to Consul
 const consul_url = "http://consul:8500";
 const axiosInstance = axios.create({
-  timeout: 15000,
+  timeout: 5000,
 });
 
 let authServiceIndex = 0;
 let flashcardsServiceIndex = 0;
+
+const authServiceBreaker = new CircuitBreaker(5000); // 5 seconds timeout
 
 // Round Robin Service Discovery
 const getServiceAddress = async (serviceName) => {
@@ -49,6 +51,12 @@ const getServiceAddress = async (serviceName) => {
 
 router.post("/login", async (req, res) => {
   try {
+    if (authServiceBreaker.isCircuitOpen()) {
+      return res
+        .status(503)
+        .json({ message: "Service unavailable due to repeated failures." });
+    }
+
     const authServiceAddress = await getServiceAddress("auth-service");
     const response = await axiosInstance.post(
       `http://${authServiceAddress}/api/auth/login`,
@@ -56,6 +64,7 @@ router.post("/login", async (req, res) => {
     );
     res.json(response.data);
   } catch (error) {
+    authServiceBreaker.recordFailure();
     if (error.code === "ECONNABORTED") {
       res.status(408).json({ message: "Request Timeout" });
     } else {
@@ -68,6 +77,12 @@ router.post("/login", async (req, res) => {
 
 router.post("/register", async (req, res) => {
   try {
+    if (authServiceBreaker.isCircuitOpen()) {
+      return res
+        .status(503)
+        .json({ message: "Service unavailable due to repeated failures." });
+    }
+
     const authServiceAddress = await getServiceAddress("auth-service");
     const response = await axiosInstance.post(
       `http://${authServiceAddress}/api/auth/register`,
@@ -75,6 +90,7 @@ router.post("/register", async (req, res) => {
     );
     res.json(response.data);
   } catch (error) {
+    authServiceBreaker.recordFailure();
     if (error.code === "ECONNABORTED") {
       res.status(408).json({ message: "Request Timeout" });
     } else {
@@ -87,6 +103,12 @@ router.post("/register", async (req, res) => {
 
 router.post("/logout", async (req, res) => {
   try {
+    if (authServiceBreaker.isCircuitOpen()) {
+      return res
+        .status(503)
+        .json({ message: "Service unavailable due to repeated failures." });
+    }
+
     const authServiceAddress = await getServiceAddress("auth-service");
     const token = req.headers.authorization?.split(" ")[1];
     if (!token) {
@@ -103,6 +125,7 @@ router.post("/logout", async (req, res) => {
     );
     res.json(response.data);
   } catch (error) {
+    authServiceBreaker.recordFailure();
     if (error.code === "ECONNABORTED") {
       res.status(408).json({ message: "Request Timeout" });
     } else {
@@ -119,6 +142,12 @@ router.put("/:userId", async (req, res) => {
     return res.status(401).json({ message: "Authorization token required" });
   }
   try {
+    if (authServiceBreaker.isCircuitOpen()) {
+      return res
+        .status(503)
+        .json({ message: "Service unavailable due to repeated failures." });
+    }
+
     const authServiceAddress = await getServiceAddress("auth-service");
     const response = await axiosInstance.put(
       `http://auth-service:5000/api/auth/users/${req.params.userId}`,
@@ -131,6 +160,7 @@ router.put("/:userId", async (req, res) => {
     );
     res.json(response.data);
   } catch (error) {
+    authServiceBreaker.recordFailure();
     if (error.code === "ECONNABORTED") {
       res.status(408).json({ message: "Request Timeout" });
     } else {
@@ -143,6 +173,12 @@ router.put("/:userId", async (req, res) => {
 
 router.get("/status", async (req, res) => {
   try {
+    if (authServiceBreaker.isCircuitOpen()) {
+      return res
+        .status(503)
+        .json({ message: "Service unavailable due to repeated failures." });
+    }
+
     const authServiceAddress = await getServiceAddress("auth-service");
     console.log(`Auth service address resolved: ${authServiceAddress}`); // Add this log
     const response = await axiosInstance.get(
@@ -150,6 +186,7 @@ router.get("/status", async (req, res) => {
     );
     res.json(response.data);
   } catch (error) {
+    authServiceBreaker.recordFailure();
     if (error.code === "ECONNABORTED") {
       res.status(408).json({ message: "Request Timeout" });
     } else {
@@ -162,12 +199,19 @@ router.get("/status", async (req, res) => {
 
 router.get("/users", async (req, res) => {
   try {
+    if (authServiceBreaker.isCircuitOpen()) {
+      return res
+        .status(503)
+        .json({ message: "Service unavailable due to repeated failures." });
+    }
+
     const authServiceAddress = await getServiceAddress("auth-service");
     const response = await axiosInstance.get(
       `http://${authServiceAddress}/api/auth/users`
     );
     res.json(response.data);
   } catch (error) {
+    authServiceBreaker.recordFailure();
     if (error.code === "ECONNABORTED") {
       res.status(408).json({ message: "Request Timeout" });
     } else {
