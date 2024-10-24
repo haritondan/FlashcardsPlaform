@@ -1,16 +1,29 @@
-version: "3.8"
-
 services:
+  # auth-service:
+  #   build:
+  #     context: ./auth-service
+  #   container_name: auth-service
+  #   depends_on:
+  #     - auth-db
+  #   ports:
+  #     - "5000:5000"
+  #   networks:
+  #     - study-network
+
+  #for replicas testing
   auth-service:
     build:
       context: ./auth-service
-    container_name: auth-service
     depends_on:
       - auth-db
     ports:
-      - "5000:5000"
+      - "5000"
     networks:
       - study-network
+    deploy:
+      replicas: 3
+    environment:
+      - SERVICE_NAME=auth-service
 
   auth-db:
     image: postgres:16
@@ -25,16 +38,32 @@ services:
     networks:
       - study-network
 
+  # websocket testing
+  # flashcards-service:
+  #   build:
+  #     context: ./flashcards-service
+  #   container_name: flashcards-service
+  #   depends_on:
+  #     - flashcards-db
+  #   ports:
+  #     - "5001:5001"
+  #   networks:
+  #     - study-network
+
+  # for replicas testing
   flashcards-service:
     build:
       context: ./flashcards-service
-    container_name: flashcards-service
     depends_on:
       - flashcards-db
     ports:
-      - "5001:5001"
+      - "5001"
     networks:
       - study-network
+    deploy:
+      replicas: 3
+    environment:
+      - SERVICE_NAME=flashcards-service
 
   flashcards-db:
     image: postgres:13

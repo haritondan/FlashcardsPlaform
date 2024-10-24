@@ -7,29 +7,40 @@ import axios from "axios";
 import Consul from "consul";
 
 const app = express();
+let authServiceIndex = 0;
+let flashcardsServiceIndex = 0;
+
+// Round Robin Service Discovery
 const getServiceAddress = async (serviceName) => {
   try {
-    console.log(`Querying Consul Catalog for service: ${serviceName}`);
-
-    // Fetch all services and their details from Consul Catalog
+    console.log(`Querying Consul for service: ${serviceName}`);
     const services = await axios.get(
       `${consul_url}/v1/catalog/service/${serviceName}`
     );
 
-    // If the service exists, extract the first available instance
+    // If we get a list of service instances
     if (services.data && services.data.length > 0) {
-      const service = services.data[0]; // Take the first instance of the service
-      const address = `${service.ServiceAddress}:${service.ServicePort}`; // Get the service address and port
-      console.log(`Resolved service address: ${address}`);
-      return address;
+      if (serviceName === "auth-service") {
+        // Get the next auth-service instance in Round Robin fashion
+        const service = services.data[authServiceIndex % services.data.length];
+        authServiceIndex++; // Move to the next instance
+        const address = `${service.ServiceAddress}:${service.ServicePort}`;
+        console.log(`Resolved auth-service address: ${address}`);
+        return address;
+      } else if (serviceName === "flashcards-service") {
+        // Get the next flashcards-service instance in Round Robin fashion
+        const service =
+          services.data[flashcardsServiceIndex % services.data.length];
+        flashcardsServiceIndex++; // Move to the next instance
+        const address = `${service.ServiceAddress}:${service.ServicePort}`;
+        console.log(`Resolved flashcards-service address: ${address}`);
+        return address;
+      }
     } else {
-      throw new Error(`Service ${serviceName} not found in Consul Catalog`);
+      throw new Error(`Service ${serviceName} not found`);
     }
   } catch (error) {
-    console.error(
-      `Error fetching service ${serviceName} from Consul Catalog:`,
-      error
-    );
+    console.error(`Error fetching service ${serviceName}:`, error);
     throw error;
   }
 };

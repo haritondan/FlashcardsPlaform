@@ -5,7 +5,7 @@ from datetime import timedelta
 from routes import flashcards_bp
 from flask_limiter import Limiter
 from flask import request
-import requests
+import requests, os
 from flask_socketio import SocketIO, send, emit, join_room, leave_room
 
 ACCESS_EXPIRES = timedelta(minutes=15)
@@ -23,11 +23,14 @@ jwt = JWTManager(app)
 db.init_app(app)
 
 def register_service_with_consul():
+    # Use container hostname as a unique identifier
+    hostname = os.getenv("HOSTNAME", "unknown-host")
+
     service_data = {
-        "ID": "flashcards-service",
+        "ID": f"flashcards-service-{hostname}",  # Unique service ID for each instance
         "Name": "flashcards-service",
-        "Address": "flashcards-service",
-        "Port": 5001,
+        "Address": "flashcards-service",  # Same service name, Docker resolves this
+        "Port": 5001,  # Internal port
         "Check": {
             "HTTP": "http://flashcards-service:5001/api/flashcards/status",
             "Interval": "10s",
@@ -35,12 +38,11 @@ def register_service_with_consul():
         }
     }
 
-    # Register the service with Consul
     try:
         requests.put("http://consul:8500/v1/agent/service/register", json=service_data)
-        print("flashcards-service registered with Consul")
+        print(f"flashcards-service-{hostname} registered with Consul")
     except Exception as e:
-        print(f"Error registering flashcards-service with Consul: {e}")
+        print(f"Error registering flashcards-service-{hostname} with Consul: {e}")
 
 def get_ip_from_forwarded():
     if request.headers.getlist("X-Forwarded-For"):
