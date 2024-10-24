@@ -12,7 +12,7 @@ auth_bp = Blueprint('auth', __name__)
 
 limiter = Limiter(get_remote_address)
 
-max_concurrent_tasks = 3  
+max_concurrent_tasks = 10
 semaphore = threading.BoundedSemaphore(value=max_concurrent_tasks)
 
 # Register a user
@@ -80,7 +80,7 @@ def status():
     try:
         semaphore.acquire()
         try:
-            time.sleep(4)
+            # time.sleep(4)
             db.session.execute(text('SELECT 1'))  
             return jsonify({'servise': 'auth','status': 'running'}), 200
         except Exception as e:

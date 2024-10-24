@@ -5,6 +5,7 @@ from datetime import timedelta
 from routes import flashcards_bp
 from flask_limiter import Limiter
 from flask import request
+import requests
 from flask_socketio import SocketIO, send, emit, join_room, leave_room
 
 ACCESS_EXPIRES = timedelta(minutes=15)
@@ -20,6 +21,26 @@ app.config["JWT_ACCESS_TOKEN_EXPIRES"] = ACCESS_EXPIRES
 
 jwt = JWTManager(app)
 db.init_app(app)
+
+def register_service_with_consul():
+    service_data = {
+        "ID": "flashcards-service",
+        "Name": "flashcards-service",
+        "Address": "flashcards-service",
+        "Port": 5001,
+        "Check": {
+            "HTTP": "http://flashcards-service:5001/api/flashcards/status",
+            "Interval": "10s",
+            "Timeout": "5s"
+        }
+    }
+
+    # Register the service with Consul
+    try:
+        requests.put("http://consul:8500/v1/agent/service/register", json=service_data)
+        print("flashcards-service registered with Consul")
+    except Exception as e:
+        print(f"Error registering flashcards-service with Consul: {e}")
 
 def get_ip_from_forwarded():
     if request.headers.getlist("X-Forwarded-For"):
@@ -85,4 +106,5 @@ def handle_delete_flashcard_set(data):
 
 
 if __name__ == "__main__":
+  register_service_with_consul()
   socketio.run(app, debug=True, host="0.0.0.0", port=5001, allow_unsafe_werkzeug=True)

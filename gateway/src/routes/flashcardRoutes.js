@@ -1,22 +1,49 @@
 import express from "express";
 import axios from "axios";
+import Consul from "consul";
 
 const router = express.Router();
-
+const consul = new Consul({ host: "consul", port: 8500 });
+const consul_url = "http://consul:8500";
 const axiosInstance = axios.create({
-  timeout: 5000,
+  timeout: 15000,
 });
 
-// router.use((req, res, next) => {
-//   req.setTimeout(5000, () => {
-//     res.status(408).json({ message: "Request Timeout" });
-//   });
-//   next();
-// });
+// Function to get service address from Consul
+const getServiceAddress = async (serviceName) => {
+  try {
+    console.log(`Querying Consul Catalog for service: ${serviceName}`);
+
+    // Fetch all services and their details from Consul Catalog
+    const services = await axios.get(
+      `${consul_url}/v1/catalog/service/${serviceName}`
+    );
+
+    // If the service exists, extract the first available instance
+    if (services.data && services.data.length > 0) {
+      const service = services.data[0]; // Take the first instance of the service
+      const address = `${service.ServiceAddress}:${service.ServicePort}`; // Get the service address and port
+      console.log(`Resolved service address: ${address}`);
+      return address;
+    } else {
+      throw new Error(`Service ${serviceName} not found in Consul Catalog`);
+    }
+  } catch (error) {
+    console.error(
+      `Error fetching service ${serviceName} from Consul Catalog:`,
+      error
+    );
+    throw error;
+  }
+};
+
 router.get("/", async (req, res) => {
   try {
+    const flashcardsServiceAddress = await getServiceAddress(
+      "flashcards-service"
+    );
     const response = await axiosInstance.get(
-      "http://flashcards-service:5001/api/flashcards"
+      `http://${flashcardsServiceAddress}/api/flashcards`
     );
     res.json(response.data);
   } catch (error) {
@@ -36,8 +63,11 @@ router.post("/", async (req, res) => {
     return res.status(401).json({ message: "Authorization token is required" });
   }
   try {
+    const flashcardsServiceAddress = await getServiceAddress(
+      "flashcards-service"
+    );
     const response = await axiosInstance.post(
-      "http://flashcards-service:5001/api/flashcards",
+      `http://${flashcardsServiceAddress}/api/flashcards`,
       req.body,
       {
         headers: {
@@ -63,6 +93,9 @@ router.put("/:setId", async (req, res) => {
     return res.status(401).json({ message: "Authorization token is required" });
   }
   try {
+    const flashcardsServiceAddress = await getServiceAddress(
+      "flashcards-service"
+    );
     const response = await axiosInstance.put(
       `http://flashcards-service:5001/api/flashcards/${req.params.setId}`,
       req.body,
@@ -86,6 +119,9 @@ router.put("/:setId", async (req, res) => {
 
 router.get("/:setId", async (req, res) => {
   try {
+    const flashcardsServiceAddress = await getServiceAddress(
+      "flashcards-service"
+    );
     const response = await axiosInstance.get(
       `http://flashcards-service:5001/api/flashcards/${req.params.setId}`
     );
@@ -107,6 +143,9 @@ router.delete("/:setId", async (req, res) => {
     return res.status(401).json({ message: "Authorization token is required" });
   }
   try {
+    const flashcardsServiceAddress = await getServiceAddress(
+      "flashcards-service"
+    );
     const response = await axiosInstance.delete(
       `http://flashcards-service:5001/api/flashcards/${req.params.setId}`,
       {
@@ -129,8 +168,11 @@ router.delete("/:setId", async (req, res) => {
 
 router.get("/status", async (req, res) => {
   try {
+    const flashcardsServiceAddress = await getServiceAddress(
+      "flashcards-service"
+    );
     const response = await axiosInstance.get(
-      "http://flashcards-service:5001/api/flashcards/status"
+      `http://${flashcardsServiceAddress}/api/flashcards/status`
     );
     res.json(response.data);
   } catch (error) {

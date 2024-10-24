@@ -68,6 +68,15 @@ services:
       - "6379:6379"
     networks:
       - study-network
+
+  consul:
+    image: consul:1.15.4
+    container_name: consul
+    ports:
+      - "8500:8500"
+    networks:
+      - study-network
+
 networks:
   study-network:
     driver: bridge

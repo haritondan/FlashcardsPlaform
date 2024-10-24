@@ -10,7 +10,7 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 import threading
 
-max_concurrent_tasks = 3  # Adjust this number based on your system's capacity
+max_concurrent_tasks = 10
 semaphore = threading.BoundedSemaphore(value=max_concurrent_tasks)
 
 
