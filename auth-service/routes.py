@@ -81,6 +81,9 @@ def status():
         semaphore.acquire()
         try:
             # time.sleep(4)
+            data = request.get_json()
+            if data.get("email") == "test500error@example.com":
+                raise Exception("Simulated server error for testing")
             db.session.execute(text('SELECT 1'))  
             return jsonify({'servise': 'auth','status': 'running'}), 200
         except Exception as e:

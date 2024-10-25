@@ -85,11 +85,10 @@ app.get("/discovery-status", async (req, res) => {
 });
 // Configure Axios for Docker Unix socket access
 const axiosInstance = axios.create({
-  baseURL: "http://localhost",
+  baseURL: "http://localhost", // Placeholder, ignored due to socketPath
   socketPath: "/var/run/docker.sock",
   timeout: 10000,
 });
-
 app.get("/get_websocket_url", async (req, res) => {
   try {
     const dockerResponse = await axiosInstance.get("/containers/json");
