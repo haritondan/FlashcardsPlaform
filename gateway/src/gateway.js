@@ -1,10 +1,12 @@
 import express from "express";
 import authRoutes from "./routes/authRoutes.js";
 import flashcardRoutes from "./routes/flashcardRoutes.js";
-const consul = new Consul({ host: "consul", port: 8500 });
-const consul_url = "http://consul:8500";
 import axios from "axios";
 import Consul from "consul";
+
+const consul = new Consul({ host: "consul", port: 8500 });
+const consul_url = "http://consul:8500";
+const docker_api_url = "http://localhost";
 
 const app = express();
 let authServiceIndex = 0;
@@ -81,6 +83,48 @@ app.get("/discovery-status", async (req, res) => {
     });
   }
 });
+// Configure Axios for Docker Unix socket access
+const axiosInstance = axios.create({
+  baseURL: "http://localhost",
+  socketPath: "/var/run/docker.sock",
+  timeout: 10000,
+});
+
+app.get("/get_websocket_url", async (req, res) => {
+  try {
+    const dockerResponse = await axiosInstance.get("/containers/json");
+    const flashcardsContainers = dockerResponse.data.filter(
+      (container) =>
+        container.Names.some((name) => name.includes("flashcards-service")) &&
+        container.Ports.some(
+          (port) => port.PrivatePort === 5001 && port.PublicPort
+        )
+    );
+
+    if (flashcardsContainers.length > 0) {
+      const randomIndex = Math.floor(
+        Math.random() * flashcardsContainers.length
+      );
+      const selectedContainer = flashcardsContainers[randomIndex];
+
+      const portMapping = selectedContainer.Ports.find(
+        (port) => port.PrivatePort === 5001
+      );
+
+      const websocket_url = `ws://localhost:${portMapping.PublicPort}`;
+      return res.json({ websocket_url });
+    } else {
+      return res.status(503).json({
+        error:
+          "No available flashcards-service instances with public WebSocket port",
+      });
+    }
+  } catch (error) {
+    console.error("Error fetching WebSocket URL:", error);
+    return res.status(500).json({ error: "Failed to retrieve WebSocket URL" });
+  }
+});
+
 app.use("/api/auth", authRoutes);
 app.use("/api/flashcards", flashcardRoutes);
 
