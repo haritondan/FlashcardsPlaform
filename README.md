@@ -44,6 +44,62 @@ The platform is an online study tool that enables users to securely create, edit
 
 - **User-Service Communication as RESTful APIs** – REST architecture is simple and efficient, allowing users to easily interact with the platform's microservices.
 
+## Running and Deploying the Project
+
+This project is containerized with Docker for easy deployment and scaling. Follow the steps below to set up, deploy, and test the services.
+
+**Prerequisites:**
+
+- Docker installed
+- Docker Compose
+
+**Step 1:** Clone the repository
+
+`git clone <repository_url>`
+
+`cd <repository_folder>`
+
+**Step 2:** Run Project
+
+Each microservice has its own Dockerfile. Build the images using:
+
+`docker-compose build`
+
+Start the containers for all microservices and dependencies:
+
+`docker-compose up`
+
+Alternatively, you can combine them using:
+
+`docker-compose up --build`
+
+To check if the services are running:
+
+`docker ps`
+
+To stop and remove containers:
+
+`docker-compose down`
+
+To check the status endpoint of each service:
+
+- Authentication Service: http://localhost:8080/status
+- Flashcards Service: http://localhost:8080/status
+
+## Testing API Endpoints
+
+Use Postman or curl to test the endpoints. A **Postman collection** with sample requests is included in the repository. Every endpoint works through the **gateway** which is using port **8080**, for individual usage of services use **5000** for **auth** service and **5001** for **flashcards** service.
+
+If you’re using Docker Compose, view logs for all services with:
+
+`docker-compose logs -f`
+
+To view logs for a specific container, use:
+
+`docker logs -f <container_name>`
+
+where container_name is specified in docker Desktop or you can use `docker ps` to see all the containers that are running.
+
 ## Data Management Design
 
 ### Tables
@@ -717,12 +773,12 @@ The platform is an online study tool that enables users to securely create, edit
   }
   ```
 
-`ws://localhost:PORT` - The user establishes a WebSocket connection to your WebSocket endpoint
+`ws://localhost:PORT` - The user establishes a WebSocket connection to WebSocket
 
 ### Events
 
 - message
-- join_notofication
+- join_notification
 - leave_notification
 - new_flashcard_set
 - update_flashcard_set
