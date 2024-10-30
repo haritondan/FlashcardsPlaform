@@ -22,7 +22,7 @@ The platform is an online study tool that enables users to securely create, edit
 
 ## Service Boundaries
 
-![Architecture](img/pad-arch.drawio.png)
+![Architecture](img/pad-arch.png)
 
 ### Define Service Boundaries
 
