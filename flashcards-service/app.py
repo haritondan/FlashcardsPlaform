@@ -74,14 +74,14 @@ def on_join_notification(data):
     user_id = data['user_id']
     room = str(data['room_id'])
     join_room(room)
-    send(f"User {user_id} has joined the room {room}", to=room)
+    send(f"User {user_id} has joined the Flashcards Set{room}", to=room)
 
 @socketio.on('leave_notification')
 def on_leave_notification(data):
     user_id = data['user_id']
     room = str(data['room_id'])
 
-    send(f"User {user_id} has left the room {room}", to=room)
+    send(f"User {user_id} has left the Flashcards Set {room}", to=room)
     leave_room(room)
 
 # Flashcard actions
@@ -90,7 +90,7 @@ def handle_new_flashcard_set(data):
     user_id = data['user_id']
     room = str(data['room_id'])
     flashcard_set_title = data['flashcard_set_title']
-    emit('new_flashcard_set', f"User {user_id} created a new flashcard set: {flashcard_set_title}", to=room)
+    emit('new_flashcard_set', f"User {user_id} added a new flashcards: {flashcard_set_title}", to=room)
 
 @socketio.on('update_flashcard_set')
 def handle_update_flashcard_set(data):
@@ -99,12 +99,6 @@ def handle_update_flashcard_set(data):
     flashcard_set_title = data['flashcard_set_title']
     emit('update_flashcard_set', f"User {user_id} updated the flashcard set: {flashcard_set_title}", to=room)
 
-@socketio.on('delete_flashcard_set')
-def handle_delete_flashcard_set(data):
-    user_id = data['user_id']
-    room = str(data['room_id'])
-    flashcard_set_title = data['flashcard_set_title']
-    emit('delete_flashcard_set', f"User {user_id} deleted the flashcard set: {flashcard_set_title}", to=room)
 
 
 if __name__ == "__main__":

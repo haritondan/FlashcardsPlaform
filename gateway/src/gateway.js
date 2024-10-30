@@ -64,7 +64,7 @@ app.get("/discovery-status", async (req, res) => {
     );
 
     res.json({
-      status: "Gateway is running",
+      status: "Discovery Service is running",
       services: {
         "auth-service": {
           address: authServiceAddress,
