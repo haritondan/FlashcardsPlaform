@@ -785,7 +785,7 @@ where container_name is specified in docker Desktop or you can use `docker ps` t
 
 ### Subscription
 
-`join_notification` - the user joins an update room
+`join_notification` - use this event so the user joins an update room
 
 **Request:**
 
@@ -819,7 +819,7 @@ In this case the room_id is the same as flashcard_set_id
 
 ### Updates
 
-`new_flashcard_set` - user adds new flashcards
+`new_flashcard_set` - use this event so the user adds new flashcards
 
 **Request:**
 
@@ -848,7 +848,7 @@ In this case the room_id is the same as flashcard_set_id
   }
   ```
 
-  `update_flashcards_set` - user updates a flashcards set
+`update_flashcards_set` - use this event so the user updates a flashcards set
 
 **Request:**
 
@@ -879,7 +879,7 @@ In this case the room_id is the same as flashcard_set_id
 
 ### Unsubscription
 
-`leave_notification` - the user joins an update room
+`leave_notification` - use this event so the user joins an update room
 
 **Request:**
 
