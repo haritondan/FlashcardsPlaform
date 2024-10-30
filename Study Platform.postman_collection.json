@@ -1,0 +1,458 @@
+{
+	"info": {
+		"_postman_id": "ffdb2f98-523a-4cb8-bdc1-a2db1ceab604",
+		"name": "Study Platform",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "38586032"
+	},
+	"item": [
+		{
+			"name": "auth service",
+			"item": [
+				{
+					"name": "Register User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"username\": \"testuser\",\r\n  \"email\": \"test@example.com\",\r\n  \"password\": \"password123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/auth/register",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/auth/status",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"auth",
+								"status"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout User",
+					"request": {
+						"auth": {
+							"type": "jwt",
+							"jwt": [
+								{
+									"key": "algorithm",
+									"value": "HS256",
+									"type": "string"
+								},
+								{
+									"key": "isSecretBase64Encoded",
+									"value": false,
+									"type": "boolean"
+								},
+								{
+									"key": "payload",
+									"value": "{}",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								},
+								{
+									"key": "headerPrefix",
+									"value": "Bearer",
+									"type": "string"
+								},
+								{
+									"key": "queryParamKey",
+									"value": "token",
+									"type": "string"
+								},
+								{
+									"key": "header",
+									"value": "{}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyOTc2NTc5MCwianRpIjoiZDc2ZDVkNTUtMTQ5Yi00MGEzLThhN2UtMjRmMTdlNDhkNDI2IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNzI5NzY1NzkwLCJjc3JmIjoiMDdlMGE4M2UtMzg3MC00ODVhLWI0MGEtMGIwZTA2MWY4YzkwIiwiZXhwIjoxNzI5NzY2NjkwfQ.PNRcFzf7RmsPtWFgneClQd8TtIMW-JL7em6nMG04zTo",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/auth/logout",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"auth",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"test@example.com\",\r\n  \"password\": \"password123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Users",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/auth/users",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"auth",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update User",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyOTg2MDg0MCwianRpIjoiMjc1YTU4YmItYmJiYy00MTliLWJkNjAtNzRkMzE2N2QxZDJhIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNzI5ODYwODQwLCJjc3JmIjoiMTFkNTZhYjctMmQzMy00NDc5LThkZDQtNzFhYzQ0ZTZjMDIxIiwiZXhwIjoxNzI5ODYxNzQwfQ.0ZzcaUwdhMwQlO_tU9oOjPcP6V2XKXCxdTPcivqaRKc",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"testuser21\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/auth/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"auth",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "flash service",
+			"item": [
+				{
+					"name": "status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/flashcards/status",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"flashcards",
+								"status"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Sets",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/flashcards",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"flashcards"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Post Set ",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyOTgzNDU2OCwianRpIjoiY2FhNTFiNGItZDhhNi00Mzk2LWI0ZDctMDk1NzZmMDcyNzdhIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNzI5ODM0NTY4LCJjc3JmIjoiMjIyZTQ0YTgtNTJhYy00YTBiLTgxNWYtZWVmOTMxNDVkMDFhIiwiZXhwIjoxNzI5ODM1NDY4fQ.JExDASpsd6qAQgSukH73RVhEFAp7CPlKhm6vesVu06c",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"title\": \"Biology 1012\",\r\n  \"subject\": \"Biology\",\r\n  \"cards\": [\r\n    {\r\n      \"question\": \"What is the powerhouse of the cell?\",\r\n      \"answer\": \"Mitochondria\"\r\n    }\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/flashcards",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"flashcards"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Set by Id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/flashcards/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"flashcards",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Set",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyOTc2NTc5MCwianRpIjoiZDc2ZDVkNTUtMTQ5Yi00MGEzLThhN2UtMjRmMTdlNDhkNDI2IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNzI5NzY1NzkwLCJjc3JmIjoiMDdlMGE4M2UtMzg3MC00ODVhLWI0MGEtMGIwZTA2MWY4YzkwIiwiZXhwIjoxNzI5NzY2NjkwfQ.PNRcFzf7RmsPtWFgneClQd8TtIMW-JL7em6nMG04zTo",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"cards\": [\r\n    {\r\n      \"question\": \"What is the chemical symbol for water?2\",\r\n      \"cardId\" : 1,\r\n      \"answer\": \"H2O2\"\r\n    }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/flashcards/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"flashcards",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Set",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyOTc2NTc5MCwianRpIjoiZDc2ZDVkNTUtMTQ5Yi00MGEzLThhN2UtMjRmMTdlNDhkNDI2IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNzI5NzY1NzkwLCJjc3JmIjoiMDdlMGE4M2UtMzg3MC00ODVhLWI0MGEtMGIwZTA2MWY4YzkwIiwiZXhwIjoxNzI5NzY2NjkwfQ.PNRcFzf7RmsPtWFgneClQd8TtIMW-JL7em6nMG04zTo",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/flashcards/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"flashcards",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "gateway",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/status",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"status"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "service-discovery",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/discovery-status",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"discovery-status"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get-ws-url",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/get_websocket_url",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"get_websocket_url"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
