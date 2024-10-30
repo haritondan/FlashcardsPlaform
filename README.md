@@ -44,6 +44,12 @@ The platform is an online study tool that enables users to securely create, edit
 
 - **User-Service Communication as RESTful APIs** – REST architecture is simple and efficient, allowing users to easily interact with the platform's microservices.
 
+- **ELK Stack** – Logs from all services are aggregated in a centralized logging and monitoring solution.
+
+- **Database Redundancy/Replication + Failover** – For each database (User DB and Flash DB), we have two more database instances and connected to the main database instance that high availability and failover support.
+
+- **Data Warehouse and ETL** – We added a Data Warehouse and an ETL service that periodicly extract data, transforms, and loads it into the warehouse.
+
 ## Running and Deploying the Project
 
 This project is containerized with Docker for easy deployment and scaling. Follow the steps below to set up, deploy, and test the services.
