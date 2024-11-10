@@ -10,7 +10,6 @@ const axiosInstance = axios.create({
 });
 
 let authServiceIndex = 0;
-let flashcardsServiceIndex = 0;
 
 const retryRequest = async (fn, retries = 3, delay = 500) => {
   for (let i = 0; i < retries; i++) {
@@ -38,6 +37,86 @@ const retryRequest = async (fn, retries = 3, delay = 500) => {
   }
 };
 
+const retryRequestAcrossReplicas = async (
+  fn,
+  retries = 3,
+  delay = 500,
+  serviceName = "auth-service"
+) => {
+  for (let i = 0; i < retries; i++) {
+    try {
+      console.log(`Attempt ${i + 1} of ${retries}`);
+
+      // Get a fresh service address for each retry to potentially hit a different replica
+      const serviceAddress = await getServiceAddress(serviceName);
+
+      // Attempt the request with the current service instance
+      return await fn(serviceAddress);
+    } catch (error) {
+      const statusCode = error.response?.status;
+      console.warn(
+        `Request failed with status ${statusCode} on attempt ${i + 1}.`
+      );
+
+      // Retry only if it's a 5xx error and we haven't exhausted retries across replicas
+      if (statusCode >= 500 && i < retries - 1) {
+        console.warn(`Retrying on a new replica in ${delay}ms...`);
+        await new Promise((res) => setTimeout(res, delay)); // Wait before retrying
+      } else {
+        console.error(
+          "All retries failed or encountered a non-retriable error:",
+          statusCode
+        );
+        throw error;
+      }
+    }
+  }
+  // If all retries fail, simulate a circuit breaker trip
+  throw new Error(
+    "Circuit breaker tripped: Service unavailable due to repeated failures across replicas."
+  );
+};
+
+// const retryRequestAcrossReplicas = async (fn, replicas = 3, retriesPerReplica = 3, delay = 500, serviceName = "auth-service") => {
+//   for (let replicaIndex = 0; replicaIndex < replicas; replicaIndex++) {
+//     try {
+//       // Get the address for the current replica
+//       const serviceAddress = await getServiceAddress(serviceName);
+//       console.log(`Trying replica ${replicaIndex + 1} at ${serviceAddress}`);
+
+//       // Attempt retries on the current replica
+//       for (let attempt = 0; attempt < retriesPerReplica; attempt++) {
+//         try {
+//           console.log(`Attempt ${attempt + 1} of ${retriesPerReplica} on replica ${replicaIndex + 1}`);
+//           // Call the provided request function with the current replica address
+//           return await fn(serviceAddress); // Return response on success
+
+//         } catch (error) {
+//           const statusCode = error.response?.status;
+//           console.warn(`Attempt ${attempt + 1} failed on replica ${replicaIndex + 1} with status ${statusCode}`);
+
+//           // Retry only if it's a 5xx error and we haven't exhausted retries for this replica
+//           if (statusCode >= 500 && attempt < retriesPerReplica - 1) {
+//             console.warn(`Retrying in ${delay}ms on the same replica...`);
+//             await new Promise((res) => setTimeout(res, delay)); // Wait before retrying
+//           } else {
+//             console.warn(`Non-retriable error or max retries reached on replica ${replicaIndex + 1}`);
+//             break; // Stop retrying on this replica if it’s a non-retriable error or retries exhausted
+//           }
+//         }
+//       }
+//       console.warn(`Moving to the next replica after ${retriesPerReplica} attempts on replica ${replicaIndex + 1}`);
+
+//     } catch (error) {
+//       console.error(`Failed to retrieve address for replica ${replicaIndex + 1}:`, error.message);
+//     }
+//   }
+
+//   // If all replicas and retries fail, trigger circuit breaker
+//   console.error("Circuit breaker tripped: Service unavailable after exhausting all replicas.");
+//   throw new Error("Circuit breaker tripped: Service unavailable due to repeated failures across all replicas.");
+// };
+
 // Round Robin Service Discovery
 const getServiceAddress = async (serviceName) => {
   try {
@@ -48,22 +127,12 @@ const getServiceAddress = async (serviceName) => {
 
     // If we get a list of service instances
     if (services.data && services.data.length > 0) {
-      if (serviceName === "auth-service") {
-        // Get the next auth-service instance in Round Robin fashion
-        const service = services.data[authServiceIndex % services.data.length];
-        authServiceIndex++; // Move to the next instance
-        const address = `${service.ServiceAddress}:${service.ServicePort}`;
-        console.log(`Resolved auth-service address: ${address}`);
-        return address;
-      } else if (serviceName === "flashcards-service") {
-        // Get the next flashcards-service instance in Round Robin fashion
-        const service =
-          services.data[flashcardsServiceIndex % services.data.length];
-        flashcardsServiceIndex++; // Move to the next instance
-        const address = `${service.ServiceAddress}:${service.ServicePort}`;
-        console.log(`Resolved flashcards-service address: ${address}`);
-        return address;
-      }
+      // Get the next auth-service instance in Round Robin fashion
+      const service = services.data[authServiceIndex % services.data.length];
+      authServiceIndex++; // Move to the next instance
+      const address = `${service.ServiceAddress}:${service.ServicePort}`;
+      console.log(`Resolved auth-service address: ${address}`);
+      return address;
     } else {
       throw new Error(`Service ${serviceName} not found`);
     }
@@ -75,13 +144,22 @@ const getServiceAddress = async (serviceName) => {
 
 router.post("/login", async (req, res) => {
   try {
-    const authServiceAddress = await getServiceAddress("auth-service");
-    const response = await retryRequest(() =>
-      axiosInstance.post(
-        `http://${authServiceAddress}/api/auth/login`,
+    // Define the request function with dynamic service address
+    const requestFunction = async (serviceAddress) => {
+      return await axiosInstance.post(
+        `http://${serviceAddress}/api/auth/login`,
         req.body
-      )
+      );
+    };
+
+    // Use the retryRequestAcrossReplicas function
+    const response = await retryRequestAcrossReplicas(
+      requestFunction,
+      3,
+      500,
+      "auth-service"
     );
+
     res.json(response.data);
   } catch (error) {
     if (error.code === "ECONNABORTED") {
@@ -110,13 +188,22 @@ router.post("/login", async (req, res) => {
 
 router.post("/register", async (req, res) => {
   try {
-    const authServiceAddress = await getServiceAddress("auth-service");
-    const response = await retryRequest(() =>
-      axiosInstance.post(
-        `http://${authServiceAddress}/api/auth/register`,
+    // Define the request function with dynamic service address
+    const requestFunction = async (serviceAddress) => {
+      return await axiosInstance.post(
+        `http://${serviceAddress}/api/auth/register`,
         req.body
-      )
+      );
+    };
+
+    // Use the retryRequestAcrossReplicas function
+    const response = await retryRequestAcrossReplicas(
+      requestFunction,
+      3,
+      500,
+      "auth-service"
     );
+
     res.json(response.data);
   } catch (error) {
     if (error.code === "ECONNABORTED") {
@@ -221,7 +308,7 @@ router.get("/status", async (req, res) => {
   try {
     const authServiceAddress = await getServiceAddress("auth-service");
     console.log(`Auth service address resolved: ${authServiceAddress}`); // Add this log
-    const response = await retryRequest(() =>
+    const response = await retryRequestAcrossReplicas(() =>
       axiosInstance.get(
         `http://${authServiceAddress}/api/auth/status`,
         req.body

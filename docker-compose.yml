@@ -1,16 +1,4 @@
 services:
-  # auth-service:
-  #   build:
-  #     context: ./auth-service
-  #   container_name: auth-service
-  #   depends_on:
-  #     - auth-db
-  #   ports:
-  #     - "5000:5000"
-  #   networks:
-  #     - study-network
-
-  #for replicas testing
   auth-service:
     build:
       context: ./auth-service
@@ -38,19 +26,6 @@ services:
     networks:
       - study-network
 
-  # websocket testing
-  # flashcards-service:
-  #   build:
-  #     context: ./flashcards-service
-  #   container_name: flashcards-service
-  #   depends_on:
-  #     - flashcards-db
-  #   ports:
-  #     - "5001:5001"
-  #   networks:
-  #     - study-network
-
-  # for replicas testing
   flashcards-service:
     build:
       context: ./flashcards-service

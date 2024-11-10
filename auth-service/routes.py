@@ -26,6 +26,9 @@ def register():
         email = data.get('email')
         password = data.get('password') 
 
+        data = request.get_json()
+        if data.get("email") == "test500error@example.com":
+            raise Exception("Simulated server error for testing")
         # Check if username or email already exists
         if User.query.filter_by(username=username).first():
             return jsonify({'message': 'Username already exists'}), 400
@@ -81,9 +84,6 @@ def status():
         semaphore.acquire()
         try:
             # time.sleep(4)
-            data = request.get_json()
-            # if data.get("email") == "test500error@example.com":
-            #     raise Exception("Simulated server error for testing") for testing circuit breaker
             db.session.execute(text('SELECT 1'))  
             return jsonify({'servise': 'auth','status': 'running'}), 200
         except Exception as e:
