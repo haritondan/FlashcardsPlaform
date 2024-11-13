@@ -26,9 +26,9 @@ def register():
         email = data.get('email')
         password = data.get('password') 
 
-        data = request.get_json()
-        if data.get("email") == "test500error@example.com":
-            raise Exception("Simulated server error for testing")
+        # data = request.get_json()
+        # if data.get("email") == "test500error@example.com":
+        #     raise Exception("Simulated server error for testing")
         # Check if username or email already exists
         if User.query.filter_by(username=username).first():
             return jsonify({'message': 'Username already exists'}), 400

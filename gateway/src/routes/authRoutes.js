@@ -45,23 +45,18 @@ const retryRequestAcrossReplicas = async (
 ) => {
   for (let i = 0; i < retries; i++) {
     try {
-      console.log(`Attempt ${i + 1} of ${retries}`);
-
-      // Get a fresh service address for each retry to potentially hit a different replica
       const serviceAddress = await getServiceAddress(serviceName);
-
-      // Attempt the request with the current service instance
       return await fn(serviceAddress);
     } catch (error) {
       const statusCode = error.response?.status;
-      console.warn(
-        `Request failed with status ${statusCode} on attempt ${i + 1}.`
-      );
-
-      // Retry only if it's a 5xx error and we haven't exhausted retries across replicas
+      for (let i = 0; i < 3; i++) {
+        console.warn(
+          `Request failed with status ${statusCode} on attempt ${i + 1}.`
+        );
+      }
       if (statusCode >= 500 && i < retries - 1) {
         console.warn(`Retrying on a new replica in ${delay}ms...`);
-        await new Promise((res) => setTimeout(res, delay)); // Wait before retrying
+        await new Promise((res) => setTimeout(res, delay));
       } else {
         console.error(
           "All retries failed or encountered a non-retriable error:",
@@ -71,7 +66,7 @@ const retryRequestAcrossReplicas = async (
       }
     }
   }
-  // If all retries fail, simulate a circuit breaker trip
+
   throw new Error(
     "Circuit breaker tripped: Service unavailable due to repeated failures across replicas."
   );

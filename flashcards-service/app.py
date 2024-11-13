@@ -7,11 +7,16 @@ from flask_limiter import Limiter
 from flask import request
 import requests, os
 from flask_socketio import SocketIO, send, emit, join_room, leave_room
+from prometheus_flask_exporter import PrometheusMetrics
+import eventlet
+import eventlet.wsgi
 
 ACCESS_EXPIRES = timedelta(minutes=15)
 
 app = Flask(__name__)
 socketio = SocketIO(app) 
+metrics = PrometheusMetrics(app)
+
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://admin:password@flashcards-db:5432/flashcardsdb'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -49,7 +54,7 @@ def get_ip_from_forwarded():
         return request.headers.getlist("X-Forwarded-For")[0]
     return request.remote_addr
 
-limiter = Limiter(key_func=get_ip_from_forwarded, app=app, default_limits=["5 per minute"])
+limiter = Limiter(key_func=get_ip_from_forwarded, app=app, default_limits=["100 per minute"])
 
 app.register_blueprint(flashcards_bp)
 
@@ -103,4 +108,5 @@ def handle_update_flashcard_set(data):
 
 if __name__ == "__main__":
   register_service_with_consul()
-  socketio.run(app, debug=True, host="0.0.0.0", port=5001, allow_unsafe_werkzeug=True)
+  eventlet.wsgi.server(eventlet.listen(('0.0.0.0', 5001)), app)
+#   socketio.run(app, debug=True, host="0.0.0.0", port=5001, allow_unsafe_werkzeug=True)

@@ -6,10 +6,11 @@ from routes import auth_bp
 from flask_limiter import Limiter
 from flask import request
 import requests, os
-
+from prometheus_flask_exporter import PrometheusMetrics
 ACCESS_EXPIRES = timedelta(minutes=15)
 
 app = Flask(__name__)
+metrics = PrometheusMetrics(app)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://admin:password@auth-db:5432/authdb'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -25,7 +26,7 @@ def get_ip_from_forwarded():
         return request.headers.getlist("X-Forwarded-For")[0]
     return request.remote_addr
 
-limiter = Limiter(key_func=get_ip_from_forwarded, app=app, default_limits=["5 per minute"])
+limiter = Limiter(key_func=get_ip_from_forwarded, app=app, default_limits=["100 per minute"])
 
 def register_service_with_consul():
     # Use container hostname as a unique identifier

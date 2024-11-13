@@ -3,12 +3,14 @@ import authRoutes from "./routes/authRoutes.js";
 import flashcardRoutes from "./routes/flashcardRoutes.js";
 import axios from "axios";
 import Consul from "consul";
+import client from "prom-client";
 
 const consul = new Consul({ host: "consul", port: 8500 });
 const consul_url = "http://consul:8500";
 const docker_api_url = "http://localhost";
 
 const app = express();
+const collectDefaultMetrics = client.collectDefaultMetrics;
 let authServiceIndex = 0;
 let flashcardsServiceIndex = 0;
 
@@ -53,6 +55,11 @@ app.get("/status", (req, res) => {
   res.json({
     status: "Gateway is running",
   });
+});
+
+app.get("/metrics", async (req, res) => {
+  res.set("Content-Type", client.register.contentType);
+  res.end(await client.register.metrics());
 });
 
 app.get("/discovery-status", async (req, res) => {
