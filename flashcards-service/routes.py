@@ -9,6 +9,8 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_limiter import Limiter  
 from flask_limiter.util import get_remote_address
 import threading
+import uuid
+from models.transaction import Transaction
 
 max_concurrent_tasks = 10
 semaphore = threading.BoundedSemaphore(value=max_concurrent_tasks)
@@ -20,6 +22,64 @@ limiter = Limiter(get_remote_address)
 
 cache = redis.Redis(host='redis', port=6379, decode_responses=True)
 CACHE_KEY_PREFIX = 'flashcard_set_'
+
+
+
+@flashcards_bp.route("/api/flashcards/prepare", methods=["POST"])
+def prepare():
+    transaction_id = request.json.get("transaction_id")
+    data = request.json.get("data")
+
+    try:
+        # Create and save transaction as "prepared"
+        transaction = Transaction(transaction_id=transaction_id, status="prepared", data=data)
+        db.session.add(transaction)
+        db.session.commit()
+
+        return jsonify({"transaction_id": transaction_id, "status": "prepared"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+@flashcards_bp.route("/api/flashcards/commit", methods=["POST"])
+def commit():
+    transaction_id = request.json.get("transaction_id")
+
+    try:
+        transaction = Transaction.query.get(transaction_id)
+        if transaction and transaction.status == "prepared":
+            # Update status to "committed"
+            transaction.status = "committed"
+            db.session.commit()
+            return jsonify({"status": "committed"}), 200
+        else:
+            return jsonify({"error": "Transaction not found or not prepared"}), 404
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+@flashcards_bp.route("/api/flashcards/abort", methods=["POST"])
+def abort():
+    transaction_id = request.json.get("transaction_id")
+
+    try:
+        # Retrieve the transaction by ID
+        transaction = Transaction.query.get(transaction_id)
+        if transaction:
+            # Update status to "aborted" and commit
+            transaction.status = "aborted"
+            db.session.commit()
+
+            # Delete the transaction entry from the table
+            Transaction.query.filter_by(transaction_id=transaction_id).delete()
+            db.session.commit()
+
+            return jsonify({"status": "aborted and deleted"}), 200
+        else:
+            return jsonify({"error": "Transaction not found"}), 404
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
 
 
 # Get all flashcard sets

@@ -5,3 +5,4 @@ auth-service/_pycache__/
 # ignore the cahce files in the auth service
 auth-service/__pycache__/
 auth-service/models/__pycache__/
+test2pc.txt

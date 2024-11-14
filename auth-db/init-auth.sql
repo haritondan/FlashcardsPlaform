@@ -8,3 +8,8 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS transactions (
+    transaction_id VARCHAR(36) PRIMARY KEY,
+    status VARCHAR(10) NOT NULL, -- 'pending', 'prepared', 'committed', 'aborted'
+    data JSONB -- Storing the data to commit in JSON format (for simplicity)
+);

@@ -14,3 +14,9 @@ CREATE TABLE IF NOT EXISTS flashcards (
     question TEXT NOT NULL,
     answer TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS transactions (
+    transaction_id VARCHAR(36) PRIMARY KEY,
+    status VARCHAR(10) NOT NULL, -- 'pending', 'prepared', 'committed', 'aborted'
+    data JSONB -- Storing the data to commit in JSON format (for simplicity)
+);

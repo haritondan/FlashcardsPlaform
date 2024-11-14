@@ -131,6 +131,91 @@ app.get("/get_websocket_url", async (req, res) => {
   }
 });
 
+import { randomUUID } from "crypto";
+
+app.post("/api/2pc-store-data", async (req, res) => {
+  const data = req.body.data;
+  const transactionId = randomUUID();
+
+  try {
+    // Phase 1: Prepare
+    console.log("Phase 1: Preparing transaction");
+
+    const authPrepare = await axios.post(
+      `http://${await getServiceAddress("auth-service")}/api/auth/prepare`, // Add /api/auth prefix here
+      { transaction_id: transactionId, data }
+    );
+
+    const flashcardsPrepare = await axios.post(
+      `http://${await getServiceAddress(
+        "flashcards-service"
+      )}/api/flashcards/prepare`, // Add /api/flashcards prefix here
+      { transaction_id: transactionId, data }
+    );
+
+    if (
+      authPrepare.data.status !== "prepared" ||
+      flashcardsPrepare.data.status !== "prepared"
+    ) {
+      throw new Error("Prepare phase failed");
+    }
+
+    // Phase 2: Commit
+    console.log("Phase 2: Committing transaction");
+
+    const authCommit = await axios.post(
+      `http://${await getServiceAddress("auth-service")}/api/auth/commit`, // Add /api/auth prefix here
+      { transaction_id: transactionId }
+    );
+
+    const flashcardsCommit = await axios.post(
+      `http://${await getServiceAddress(
+        "flashcards-service"
+      )}/api/flashcards/commit`, // Add /api/flashcards prefix here
+      { transaction_id: transactionId }
+    );
+
+    if (
+      authCommit.data.status === "committed" &&
+      flashcardsCommit.data.status === "committed"
+    ) {
+      res.json({ status: "committed", transaction_id: transactionId });
+    } else {
+      throw new Error("Commit phase failed");
+    }
+  } catch (error) {
+    console.error("Error in 2PC:", error.message);
+
+    // Abort Phase: Rollback
+    console.log("Rolling back transaction");
+
+    await axios
+      .post(
+        `http://${await getServiceAddress("auth-service")}/api/auth/abort`, // Add /api/auth prefix here
+        { transaction_id: transactionId }
+      )
+      .catch((error) =>
+        console.error("Auth Service Abort Failed:", error.message)
+      );
+
+    await axios
+      .post(
+        `http://${await getServiceAddress(
+          "flashcards-service"
+        )}/api/flashcards/abort`, // Add /api/flashcards prefix here
+        { transaction_id: transactionId }
+      )
+      .catch((error) =>
+        console.error("Flashcards Service Abort Failed:", error.message)
+      );
+
+    res.status(500).json({
+      error: "Transaction aborted due to error",
+      details: error.message,
+    });
+  }
+});
+
 app.use("/api/auth", authRoutes);
 app.use("/api/flashcards", flashcardRoutes);
 
