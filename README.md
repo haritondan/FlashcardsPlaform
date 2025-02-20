@@ -1,8 +1,8 @@
-# Online Study Platform
+# Flashcards Plaform (Online Study Platform)
 
 ## Project Description
 
-The platform is an online study tool that enables users to securely create, edit, share flashcards and has authentication services.
+This are my laboratories from the Distributed Systems Programming course at TUM(Technical University of Moldova).The platform is an online study tool that enables users to securely create, edit, share flashcards and has authentication services.
 
 ## Application Suitability Assessment
 
